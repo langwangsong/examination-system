@@ -17,3 +17,5 @@ npm install vue-router@4
 npm install element-plus --save
 
 npm install -D sass-embedded
+
+npm install xlsx
