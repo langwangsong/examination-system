@@ -11,3 +11,9 @@ cd my-project
 npm install
 
 npm run dev
+
+npm install vue-router@4
+
+npm install element-plus --save
+
+npm install -D sass-embedded
