@@ -1,7 +1,7 @@
 <template>
     <el-card class="card">
         <template #header>
-            <div>四中信息技术学业水平模拟系统</div>
+            <div>信息技术学业水平模拟系统</div>
         </template>
         <el-form :model="formData">
             <el-form-item label="班级:">
@@ -36,12 +36,8 @@
 <script setup lang="ts">
 import {ref} from 'vue'
 const formData = ref({classData:'', numberData:'', username:''})
-import * as XLSX from 'xlsx'
-const workbook = XLSX.readFile('./info.xlsx')
-const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-const data = XLSX.utils.sheet_to_json(worksheet)
 const onSubmit = ()=>{
-    console.log(data)
+    console.log(formData.value)
 }
 </script>
 <style lang="scss" scoped>
