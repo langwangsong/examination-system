@@ -10,7 +10,7 @@
                     v-for="n in 8"
                     :key="n"
                     :label="'八年级'+n + '班'"
-                    :value="'八年级'+n + '班'"
+                    :value="n.toString()"
                     />
                 </el-select>
             </el-form-item>
@@ -20,7 +20,7 @@
                     v-for="n in 60"
                     :key="n"
                     :label="n"
-                    :value="n"
+                    :value="n.toString()"
                     />
                 </el-select>
             </el-form-item>
@@ -34,10 +34,34 @@
     </el-card>
 </template>
 <script setup lang="ts">
-import {ref} from 'vue'
+import {onMounted, ref} from 'vue'
+import axios from 'axios'
+import router from '../router'
+import {useUserStore} from '../store/user'
+const userStore = useUserStore()
+onMounted(()=>{
+    console.log("user",userStore.username)
+    if(userStore.isLoginedIn){
+        router.push("/examination")
+    }
+})
+const instance = axios.create({
+    baseURL: 'http://localhost:8000', 
+    timeout: 1000,
+});
 const formData = ref({classData:'', numberData:'', username:''})
 const onSubmit = ()=>{
-    console.log(formData.value)
+    instance.post('/login',formData.value).then(res=>{
+        if(res.data.code == 200){
+            userStore.login(res.data.user)
+            router.push("/examination")
+        }else{
+            console.log("学号班级姓名有误！")
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+    })
+    
 }
 </script>
 <style lang="scss" scoped>

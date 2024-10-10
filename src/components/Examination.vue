@@ -16,7 +16,7 @@
         <el-main>
             <div>一、单选题(共20题， 每题2分)</div>
             <div v-for="n in 20" :key="n">
-                <div>
+                <div id="image-container">
                 {{ n }}：{{ chooseQuestion[0].desc }}
                 </div>
                 <el-radio-group v-model="chooseQuestion[0].reply" :disabled="canAnswer">
@@ -45,7 +45,11 @@
     </el-container>
 </template>
 <script setup lang="ts">
-import {ref} from 'vue'
+import {onMounted, ref} from 'vue'
+import {useUserStore} from '../store/user'
+import router from '../router';
+import axios from 'axios'
+const userStore = useUserStore()
 const time = ref(12)
 const canSubmit = ref(false)
 const chooseQuestion = ref<questions>([{desc:'题目描述', a:'A选项', b:'B选项', c:'C选项', d:'D选项', ans:'A', reply:'0', color:'black'}])
@@ -63,6 +67,21 @@ interface questions{
     reply:string
     color: string
 }
+const instance = axios.create({
+    baseURL: 'http://localhost:8000', 
+    timeout: 1000,
+});
+onMounted(()=>{
+    console.log(userStore)
+    if(!userStore.isLoginedIn){
+        router.push("/login")
+    }
+    instance.get('/examination').then(res=>{
+        console.log(res)
+    }).catch(error => {
+        console.error('Error:', error);
+    })
+})
 let intervalId = setInterval(() => {
     time.value --
 }, 1000);
