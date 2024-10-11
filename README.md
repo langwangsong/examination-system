@@ -21,3 +21,5 @@ npm install -D sass-embedded
 npm install axios
 
 npm install pinia
+
+npm i pinia-plugin-persistedstate

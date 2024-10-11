@@ -40,7 +40,6 @@ import router from '../router'
 import {useUserStore} from '../store/user'
 const userStore = useUserStore()
 onMounted(()=>{
-    console.log("user",userStore.username)
     if(userStore.isLoginedIn){
         router.push("/examination")
     }

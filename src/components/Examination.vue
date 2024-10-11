@@ -2,9 +2,10 @@
     <el-container>
         <el-header>
             <el-space spacer="|">
-                <div>八年级1班</div>
-                <div>张三</div>
-                <div>1号</div>
+                <div>八年级{{userStore.classData}}班</div>
+                <div>{{ userStore.username }}</div>
+                <div>{{ userStore.numberData }}号</div>
+                <el-button type="primary" @click="onLogout">退出</el-button>
             </el-space>
                 <div>
                     <div>分数：{{ score }}</div>
@@ -15,26 +16,30 @@
         <el-divider />
         <el-main>
             <div>一、单选题(共20题， 每题2分)</div>
-            <div v-for="n in 20" :key="n">
-                <div id="image-container">
-                {{ n }}：{{ chooseQuestion[0].desc }}
+            <div v-for="(item, n) in allQuestions.slice(0, 20)" :key="n">
+                <div>
+                    <p>{{ n + 1 }}：</p>
+                    <el-image :src="'http://localhost:8000/chooseQuestions/'+item.desc" lazy/>
                 </div>
-                <el-radio-group v-model="chooseQuestion[0].reply" :disabled="canAnswer">
-                    <el-radio :value="'A'">A: {{ chooseQuestion[0].a }}</el-radio>
-                    <el-radio :value="'B'">B: {{ chooseQuestion[0].b }}</el-radio>
-                    <el-radio :value="'C'">C: {{ chooseQuestion[0].c }}</el-radio>
-                    <el-radio :value="'D'">D: {{ chooseQuestion[0].d }}</el-radio>
+                <el-radio-group v-model="item.reply" :disabled="canAnswer">
+                    <el-radio :value="'A'">A: {{ item.a }}</el-radio>
+                    <el-radio :value="'B'">B: {{ item.b }}</el-radio>
+                    <el-radio :value="'C'">C: {{ item.c }}</el-radio>
+                    <el-radio :value="'D'">D: {{ item.d }}</el-radio>
                 </el-radio-group>
-                <div v-show="answerShow" :style="{color: chooseQuestion[0].color}">答案：{{ chooseQuestion[0].ans }}</div>
+                <div v-show="answerShow" :style="{color: item.color}">答案：{{ item.ans }}</div>
             </div>
             <div>二、判断题(共10题， 每题2分)</div>
-            <div v-for="n in 10" :key="n">
-                {{ n }} ：{{ judgeQuestion[0].desc }}
-                <el-radio-group v-model="judgeQuestion[0].reply" :disabled="canAnswer">
-                    <el-radio :value="'A'">A: {{ judgeQuestion[0].a }}</el-radio>
-                    <el-radio :value="'B'">B: {{ judgeQuestion[0].b }}</el-radio>
+            <div v-for="(item, n) in allQuestions.slice(20, 30)" :key="n">
+                <div>
+                    {{ n + 1 }} ：
+                    <el-image :src="'http://localhost:8000/judgeQuestions/'+item.desc"/>
+                </div>
+                <el-radio-group v-model="item.reply" :disabled="canAnswer">
+                    <el-radio :value="'A'">A: {{ item.a }}</el-radio>
+                    <el-radio :value="'B'">B: {{ item.b }}</el-radio>
                 </el-radio-group>
-                <div v-show="answerShow" :style="{color: judgeQuestion[0].color}">答案：{{ judgeQuestion[0].ans }}</div>
+                <div v-show="answerShow" :style="{color: item.color}">答案：{{ item.ans }}</div>
             </div>
         </el-main>
         <el-footer>
@@ -50,10 +55,9 @@ import {useUserStore} from '../store/user'
 import router from '../router';
 import axios from 'axios'
 const userStore = useUserStore()
-const time = ref(12)
+const time = ref(20*60)
 const canSubmit = ref(false)
-const chooseQuestion = ref<questions>([{desc:'题目描述', a:'A选项', b:'B选项', c:'C选项', d:'D选项', ans:'A', reply:'0', color:'black'}])
-const judgeQuestion = ref<questions>([{desc:'题目描述', a:'对', b:'错', c:'', d:'', ans:'B', reply:'0', color:'black'}])
+const allQuestions = ref<questions[]>([])
 const canAnswer = ref(false)
 const answerShow = ref(false)
 const score = ref(0)
@@ -72,12 +76,11 @@ const instance = axios.create({
     timeout: 1000,
 });
 onMounted(()=>{
-    console.log(userStore)
     if(!userStore.isLoginedIn){
         router.push("/login")
     }
     instance.get('/examination').then(res=>{
-        console.log(res)
+        allQuestions.value = res.data
     }).catch(error => {
         console.error('Error:', error);
     })
@@ -89,29 +92,23 @@ let timeoutId = setTimeout(() => {
     clearInterval(intervalId)
     canSubmit.value = true
     onSubmit()
-}, 12 * 1000);
+}, time.value * 1000);
 const onSubmit = ()=>{
-    console.log('交卷了！')
-    for(let item of chooseQuestion.value){
+    for(let item of allQuestions.value){
         if(item.ans == item.reply){
             score.value += 2
         }else{
             item.color = 'red'
         }
     }
-    for(let item of judgeQuestion.value){
-        if(item.ans == item.reply){
-            score.value += 2
-        }else{
-            item.color = 'red'
-        }
-    }
-    console.log(chooseQuestion.value)
-    console.log(judgeQuestion.value)
     canAnswer.value = true
     canSubmit.value = true
     answerShow.value = true
     clearInterval(intervalId)
     clearTimeout(timeoutId)
+}
+const onLogout = ()=>{
+    userStore.logout()
+    router.push("/login")
 }
 </script>

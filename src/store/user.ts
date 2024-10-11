@@ -11,6 +11,10 @@ export const useUserStore = defineStore('userStore', {
         numberData: '',
         isLoginedIn: false
     }),
+    persist: {
+        key: "userinfo",
+        storage: sessionStorage
+    },
     actions: {
         login(userInfo: user) {
             this.username = userInfo.username
@@ -23,6 +27,7 @@ export const useUserStore = defineStore('userStore', {
             this.classData = ''
             this.numberData = ''
             this.isLoginedIn = false
+            sessionStorage.clear()
         }
     }
 })
